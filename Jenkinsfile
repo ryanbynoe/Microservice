@@ -2,20 +2,22 @@ pipeline {
     agent any
 
     stages {
-        stage('Deploy To Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', serverUrl: 'https://9F39F577334FF23706994135261985F2.gr7.ap-south-1.eks.amazonaws.com']]) {
+                kubeconfig(credentialsId: 'k8-token', serverUrl: 'https://43314C0861EAA75D943EC6183BF28E81.gr7.us-east-1.eks.amazonaws.com') {
                     sh "kubectl apply -f deployment-service.yml"
-                    
+                    sleep 60
                 }
+                echo 'Deployment applied and waiting for 60 seconds'
             }
         }
-        
-        stage('verify Deployment') {
+
+        stage('Verify Deployment') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', serverUrl: 'https://9F39F577334FF23706994135261985F2.gr7.ap-south-1.eks.amazonaws.com']]) {
-                    sh "kubectl get svc -n webapps"
+                kubeconfig(credentialsId: 'k8-token', serverUrl: 'https://43314C0861EAA75D943EC6183BF28E81.gr7.us-east-1.eks.amazonaws.com') {
+                    sh "kubectl get all -n webapps"
                 }
+                echo 'Deployment verification completed'
             }
         }
     }
